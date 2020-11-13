@@ -8,7 +8,7 @@ using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
 
-namespace Coolblue_PS5_Watcher
+namespace PS5_Watcher
 {
     public class Utilities
     {
