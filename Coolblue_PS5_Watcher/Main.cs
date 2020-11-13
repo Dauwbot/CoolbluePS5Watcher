@@ -33,27 +33,19 @@ namespace Coolblue_PS5_Watcher
                     Thread.Sleep(retryTimer * 1000);
                 }
             } while (productAvailable == false);
-
-            Console.WriteLine("Sending message alert");
             
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appSecrets.json", optional: false, reloadOnChange: true);
             IConfigurationRoot configuration = builder.Build();
 
-            var twilioSettings = configuration.GetSection("TwilioSecrets");
-            var accountSid = twilioSettings["AccountSid"];
-            var accountToken = twilioSettings["AuthToken"];
-            var senderNumber = twilioSettings["SenderNumber"];
-            var receiverNumber = twilioSettings["ReceiverNumber"];
-            
-            TwilioClient.Init(accountSid, accountToken);
+            Console.WriteLine("Item available, alerting user");
+            Console.WriteLine("Sending email alert");
+            baseUtily.SendMail(configuration);
 
-            MessageResource message = MessageResource.Create(
-                body: "PS5 disponible sur Coolblue",
-                from: new PhoneNumber(senderNumber),
-                to: new PhoneNumber(receiverNumber)
-            );
+            Console.WriteLine("Sending message alert");
+            string messageInfos = baseUtily.SendSMS(configuration);
+            Console.WriteLine(messageInfos);
         }
     }
 }
