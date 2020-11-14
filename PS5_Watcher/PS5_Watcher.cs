@@ -14,7 +14,24 @@ namespace PS5_Watcher
         public static void Main(string[] args)
         {
             Dictionary<string, string[]> websites = new Dictionary<string, string[]>();
-           websites.Add("Foo", new [] {"Url", "WordToFindInHtml"});
+            websites.Add("Coolblue",
+                new[] 
+                {
+                    "https://www.coolblue.be/fr/produit/865866/playstation-5.html",
+                    "/fr/panier?add="
+                });
+            websites.Add("Mediamarkt",
+                new[]
+                {
+                    "https://www.mediamarkt.be/fr/product/_playstation-ps5-825-gb-9395201-1907411.html",
+                    "servlet/MultiChannelOrderCatalogEntryAdd?storeId="
+                    });
+            websites.Add("Bol.com",
+                new []
+                {
+                    "https://www.bol.com/nl/p/sony-playstation-5-console/9300000004162282/?language=nl-BE&country=BE&approved=true",
+                    "basket/addItems.html?productId=9300000004162282"
+                    });
 
             //Adding the JSON file containing our secrets to the application
             IConfigurationBuilder builder = new ConfigurationBuilder()

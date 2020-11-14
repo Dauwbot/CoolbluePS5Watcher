@@ -30,7 +30,7 @@ namespace PS5_Watcher
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     Stream receiveStream = response.GetResponseStream();
-                    StreamReader reader = null;
+                    StreamReader reader;
 
                     if (string.IsNullOrWhiteSpace(response.CharacterSet))
                         reader = new StreamReader(receiveStream);
