@@ -10,7 +10,7 @@ You will need to grab a free [Twilio account](https://www.twilio.com/try-twilio)
 
 You also need a SMTP capable mail provider, I use Google SMTP with MailKit, less than 10 lines code to send a mail.
 
-Finally, you need to set the correct information into an `appSecrets.json` file, just rename the `example_` file.
+Finally, you need to set the correct information into an `appSecrets.json` file, just rename and update the `appSecrets.example` file.
 
 Finally no help compiling and running this code will be given, you're on your own. Hint: You could just launch it in your IDE and it will work. Target framework in .NET5 but I don't use any C#9 functions so you could port it back…
 
