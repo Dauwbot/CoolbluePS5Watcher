@@ -7,11 +7,8 @@ namespace PS5_Watcher
 {
     public class PS5_Watcher
     {
-        private const int retryTimer = 45;
-
-        //private const string urlToWatch = "https://www.coolblue.be/fr/produit/865866/playstation-5.html";
-        private const string urlToWatch =
-            "https://www.coolblue.be/fr/produit/828805/apple-airpods-2-avec-boitier-de-charge.htmll";
+        private const string urlToWatch = "https://www.coolblue.be/fr/produit/865866/playstation-5.html";
+        //private const string urlToWatch = "https://www.coolblue.be/fr/produit/828805/apple-airpods-2-avec-boitier-de-charge.htmll";
 
         public static void Main(string[] args)
         {
@@ -20,7 +17,10 @@ namespace PS5_Watcher
 
             do
             {
-                var htmlData = utility.HtmlContentStream(urlToWatch);
+                int retryTimer = utility.GenerateRandomNumberInRange(40, 65);
+                Console.Write("Downloading URL HTML Content ");
+                string htmlData = utility.HtmlContentAsStream(urlToWatch);
+                Console.Write("| Finished downloading \n");
                 if (utility.CheckStringForSubstring(htmlData, "/fr/panier?add=") >= 0)
                 {
                     productAvailable = true;
@@ -37,10 +37,10 @@ namespace PS5_Watcher
                 .AddJsonFile("appSecrets.json", false, true);
             IConfigurationRoot configuration = builder.Build();
 
+            Console.WriteLine("Item available, alerting user");
             Console.WriteLine("Opening website");
             utility.OpenUrl(urlToWatch);
-
-            Console.WriteLine("Item available, alerting user");
+            
             Console.WriteLine("Sending email alert");
             utility.SendMail(configuration);
 

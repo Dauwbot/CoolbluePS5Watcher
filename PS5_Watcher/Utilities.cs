@@ -14,14 +14,12 @@ namespace PS5_Watcher
 {
     public class Utilities
     {
-        public string HtmlContentStream(string urlAddress)
+        public string HtmlContentAsStream(string urlAddress)
         {
             string data = null;
             HttpWebRequest request = (HttpWebRequest) WebRequest.Create(urlAddress);
             request.UserAgent =
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36";
-            request.Headers["cookie"] =
-                "Coolblue-Session=10316bdae7e1793985a7553e4b313437; Secure-Coolblue=0dbf3e47077716eae77af95ee19c4713; PHPSESSID=qh139u3ibs9ckr410uisuerjbn; wishListRequested=true; seenLanguageEmphasis=1; locale=fr_BE; assignedVariations=egDtDbt4N36YYsF9XkYW1qGeWFEe61EitS9UDsTm9F1MP3fTxY5VJ7ViUUy3UkLUY1WSn0UFzYivhdhgNDI21LVTWRtSxrooQWAEioaafRPa6e9gxlPJVQ6YTBC7nms97U17DnTXuS6i8aMpSLdBwV2mjQCEQnbmoquk3ayFsP6QykCmO7XURaHyet6MbyWZPtMPb2cAIGKeY1G3SHqRiq8fdDrYpTSFowWtqLFZtYx2HuRAvNxSpNXD19GZ8wVR0JOoJ4i5; _dd_s=rum=0&expire=1605202357056";
             HttpWebResponse response = (HttpWebResponse) request.GetResponse();
 
             if (response.StatusCode == HttpStatusCode.OK)
@@ -37,6 +35,10 @@ namespace PS5_Watcher
                 data = reader.ReadToEnd();
                 response.Close();
                 reader.Close();
+            }
+            else
+            {
+                data = "There was a problem downloading HTML data, check if it is still working";
             }
 
             return data;
@@ -108,6 +110,18 @@ namespace PS5_Watcher
                 smtpClient.Send(mailMessage);
                 smtpClient.Disconnect(true);
             }
+        }
+
+        internal int GenerateRandomNumberInRange(int min, int max)
+        {
+            Random random = new Random(); 
+            return random.Next(min, max);
+        }
+
+        internal DateTime GetCurrentDate()
+        {
+            DateTime date = DateTime.Now;
+            return date;
         }
     }
 }
