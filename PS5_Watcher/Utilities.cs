@@ -8,6 +8,8 @@ using System.Text;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
@@ -22,6 +24,21 @@ namespace PS5_Watcher
             string? data;
             try
             {
+                if (CheckStringForSubstring(urlAddress, "cdiscount") >= 0)
+                {
+                    ChromeOptions options = new ChromeOptions();
+                    options.AddArgument("headless");
+                    options.AddArgument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36");
+                    ChromeDriverService service = ChromeDriverService.CreateDefaultService();
+                    service.HideCommandPromptWindow = true;
+                    
+                    IWebDriver driver = new ChromeDriver(service, options);
+                    driver.Navigate().GoToUrl(urlAddress);
+                    data = driver.PageSource;
+                    driver.Close();
+                    
+                    return data;
+                }
                 HttpWebRequest request = (HttpWebRequest) WebRequest.Create(urlAddress);
                 //Make us appear as a normal web browser rather than just a bot
                 request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36";
@@ -125,6 +142,13 @@ namespace PS5_Watcher
                 smtpClient.Disconnect(true);
             }
         }
+        
+        public void HtmlToFile(string htmlData, string filePath)
+        {
+            StreamWriter writer = new StreamWriter(filePath, false, Encoding.UTF8);
+            writer.Write(htmlData);
+            writer.Close();
+        }
 
         internal int GenerateRandomNumberInRange(int min, int max)
         {
@@ -143,17 +167,17 @@ namespace PS5_Watcher
                 return GenerateRandomNumberInRange(300, 900); 
             }
             
-            if (date.Hour is (<= 7 or >= 16))
+            if (date.Hour is (<= 6 or >= 20))
             {
                 return GenerateRandomNumberInRange(150, 300);
             }
             
-            if (date.Hour is (<= 9 or >= 13))
+            if (date.Hour is (<= 8 or >= 16))
             {
-                return GenerateRandomNumberInRange(60, 150);
+                return GenerateRandomNumberInRange(30, 150);
             }
             
-            return GenerateRandomNumberInRange(20, 60);
+            return GenerateRandomNumberInRange(10, 30);
         }
     }
 }

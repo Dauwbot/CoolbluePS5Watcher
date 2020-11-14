@@ -38,6 +38,12 @@ namespace PS5_Watcher
                     "https://www.cdiscount.com/jeux-pc-video-console/ps5/console-ps5/l-1035001.html#_his_",
                     "PLAYSTATION 5"
                     });
+            // websites.Add("Fnac BE",
+            //     new []
+            //     {
+            //         "https://www.fr.fnac.be/Precommande-Console-Sony-PS5-Edition-Standard/a14119956",
+            //         "PLAYSTATION 5"
+            //     });
 
             //Adding the JSON file containing our secrets to the application
             IConfigurationBuilder builder = new ConfigurationBuilder()
@@ -57,6 +63,11 @@ namespace PS5_Watcher
                     int retryTimer = utility.GetRetryTimer();
                     
                     string htmlData = utility.HtmlContentAsStream(website.Value[0]);
+                    if (retryTimer > 90)
+                    {
+                        FileInfo fileInfo = new FileInfo(Directory.GetCurrentDirectory());
+                        utility.HtmlToFile(htmlData, fileInfo.Directory + $"\\{website.Key}.html");
+                    }
                     /*    Checking the HTML data for a specific string that is present on the website if we can add to cart
                           No this program does not use any kind of "Artificial Intelligence" or "Machine Learning"
                           You could find the <a> tags or <class = ...> from other ecommerce site and replicate this functionality on those :wink wink:
