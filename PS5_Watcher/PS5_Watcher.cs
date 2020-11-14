@@ -12,15 +12,27 @@ namespace PS5_Watcher
 
         public static void Main(string[] args)
         {
+            //Adding the JSON file containing our secrets to the application
+            IConfigurationBuilder builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appSecrets.json", false, true);
+            IConfigurationRoot configuration = builder.Build();
+            //Class containing all our methods
             Utilities utility = new Utilities();
+            
             var productAvailable = false;
 
             do
             {
+                //Randomize retry timer to appear "Human". Honestly no human would refresh for more than 10hours.
                 int retryTimer = utility.GenerateRandomNumberInRange(40, 65);
                 Console.Write("Downloading URL HTML Content ");
                 string htmlData = utility.HtmlContentAsStream(urlToWatch);
                 Console.Write("| Finished downloading \n");
+                /*    Checking the HTML data for a specific string that is present on the website if we can add to cart
+                      No this program does not use any kind of "Artificial Intelligence" or "Machine Learning"
+                      You could find the <a> tags or <class = ...> from other ecommerce site and replicate this functionality on those :wink wink:
+                */    
                 if (utility.CheckStringForSubstring(htmlData, "/fr/panier?add=") >= 0)
                 {
                     productAvailable = true;
@@ -28,14 +40,10 @@ namespace PS5_Watcher
                 else
                 {
                     Console.WriteLine($"Product is not available, retrying in {retryTimer} seconds");
+                    //Thread sleep is in milliseconds, I don't want to type milliseconds times...
                     Thread.Sleep(retryTimer * 1000);
                 }
             } while (productAvailable == false);
-
-            IConfigurationBuilder builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appSecrets.json", false, true);
-            IConfigurationRoot configuration = builder.Build();
 
             Console.WriteLine("Item available, alerting user");
             Console.WriteLine("Opening website");

@@ -14,10 +14,12 @@ namespace PS5_Watcher
 {
     public class Utilities
     {
+        //Grab the content of a webpage in a stream and place it in a string for easier analysis
         public string HtmlContentAsStream(string urlAddress)
         {
             string data = null;
             HttpWebRequest request = (HttpWebRequest) WebRequest.Create(urlAddress);
+            //Make us appear as a normal web browser rather than just a bot
             request.UserAgent =
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36";
             HttpWebResponse response = (HttpWebResponse) request.GetResponse();
@@ -38,17 +40,21 @@ namespace PS5_Watcher
             }
             else
             {
+                //Well if we can't download the HTML we've surely been blacklisted as a bot...
+                //If you've a dynamic IP you should restart your router and hope it works again
                 data = "There was a problem downloading HTML data, check if it is still working";
             }
 
             return data;
         }
 
+        //Wrapper for IndexOf
         internal int CheckStringForSubstring(string completeString, string substringToFind)
         {
             return completeString.IndexOf(substringToFind);
         }
 
+        //Process.Start does not work correctly on .NET CORE. Walk around
         internal void OpenUrl(string urlAddress)
         {
             Process.Start(new ProcessStartInfo("cmd", $"/c start {urlAddress}") {CreateNoWindow = true});
