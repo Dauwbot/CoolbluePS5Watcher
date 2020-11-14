@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -17,34 +19,40 @@ namespace PS5_Watcher
         //Grab the content of a webpage in a stream and place it in a string for easier analysis
         public string HtmlContentAsStream(string urlAddress)
         {
-            string data = null;
-            HttpWebRequest request = (HttpWebRequest) WebRequest.Create(urlAddress);
-            //Make us appear as a normal web browser rather than just a bot
-            request.UserAgent =
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36";
-            HttpWebResponse response = (HttpWebResponse) request.GetResponse();
-
-            if (response.StatusCode == HttpStatusCode.OK)
+            string? data;
+            try
             {
-                Stream receiveStream = response.GetResponseStream();
-                StreamReader reader = null;
+                HttpWebRequest request = (HttpWebRequest) WebRequest.Create(urlAddress);
+                //Make us appear as a normal web browser rather than just a bot
+                request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36";
+                HttpWebResponse response = (HttpWebResponse) request.GetResponse();
 
-                if (string.IsNullOrWhiteSpace(response.CharacterSet))
-                    reader = new StreamReader(receiveStream);
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    Stream receiveStream = response.GetResponseStream();
+                    StreamReader reader = null;
+
+                    if (string.IsNullOrWhiteSpace(response.CharacterSet))
+                        reader = new StreamReader(receiveStream);
+                    else
+                        reader = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
+
+                    data = reader.ReadToEnd();
+                    response.Close();
+                    reader.Close();
+                }
                 else
-                    reader = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
-
-                data = reader.ReadToEnd();
-                response.Close();
-                reader.Close();
+                {
+                    //Well if we can't download the HTML we've surely been blacklisted as a bot...
+                    //If you've a dynamic IP you should restart your router and hope it works again
+                    data = "There was a problem downloading HTML data, check if it is still working";
+                }
             }
-            else
+            catch (Exception e)
             {
-                //Well if we can't download the HTML we've surely been blacklisted as a bot...
-                //If you've a dynamic IP you should restart your router and hope it works again
-                data = "There was a problem downloading HTML data, check if it is still working";
+                Console.WriteLine(e);
+                throw;
             }
-
             return data;
         }
 
@@ -60,7 +68,7 @@ namespace PS5_Watcher
             Process.Start(new ProcessStartInfo("cmd", $"/c start {urlAddress}") {CreateNoWindow = true});
         }
 
-        internal string SendSMS(IConfigurationRoot configuration)
+        internal string SendSMS(IConfigurationRoot configuration, KeyValuePair<string, string[]> keyValuePair)
         {
             DateTime? messageDateCreated;
             try
@@ -74,7 +82,7 @@ namespace PS5_Watcher
                 TwilioClient.Init(accountSid, accountToken);
 
                 MessageResource message = MessageResource.Create(
-                    body: "PS5 disponible sur Coolblue",
+                    body: $"PS5 disponible sur {keyValuePair.Key} @ {keyValuePair.Value[0]}",
                     from: new PhoneNumber(senderNumber),
                     to: new PhoneNumber(receiverNumber)
                 );
@@ -87,10 +95,10 @@ namespace PS5_Watcher
                 throw;
             }
 
-            return $"Message should have been sent at {messageDateCreated}";
+            return $"Sent at {messageDateCreated}";
         }
 
-        internal void SendMail(IConfigurationRoot configuration)
+        internal void SendMail(IConfigurationRoot configuration, KeyValuePair<string, string[]> keyValuePair)
         {
             IConfigurationSection mailSettings = configuration.GetSection("MailSettings");
             var mailSenderName = mailSettings["SenderName"];
@@ -103,10 +111,10 @@ namespace PS5_Watcher
             MimeMessage mailMessage = new MimeMessage();
             mailMessage.From.Add(new MailboxAddress(mailSenderName, mailSenderAddress));
             mailMessage.To.Add(new MailboxAddress(receiverName, receiverAddress));
-            mailMessage.Subject = "PS5 Disponible";
+            mailMessage.Subject = $"PS5 Disponible sur {keyValuePair.Key}";
             mailMessage.Body = new TextPart("plain")
             {
-                Text = $"PS5 disponible sur le site {mailSenderName}"
+                Text = $"PS5 disponible sur le site {keyValuePair.Key}  @ {keyValuePair.Value[0]}"
             };
 
             using (SmtpClient smtpClient = new SmtpClient())
@@ -122,12 +130,6 @@ namespace PS5_Watcher
         {
             Random random = new Random(); 
             return random.Next(min, max);
-        }
-
-        internal DateTime GetCurrentDate()
-        {
-            DateTime date = DateTime.Now;
-            return date;
         }
 
         //Set the retry timer regarding the current time, we will let it run quite a while so...
