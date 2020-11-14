@@ -129,5 +129,29 @@ namespace PS5_Watcher
             DateTime date = DateTime.Now;
             return date;
         }
+
+        //Set the retry timer regarding the current time, we will let it run quite a while so...
+        public int GetRetryTimer()
+        {
+            DateTime date = DateTime.Now;
+
+            //If we're another date than the 18th or 19th
+            if (date.Day is not (18 or 19))
+            {
+                return GenerateRandomNumberInRange(300, 900); 
+            }
+            
+            if (date.Hour is (<= 7 or >= 16))
+            {
+                return GenerateRandomNumberInRange(150, 300);
+            }
+            
+            if (date.Hour is (<= 9 or >= 13))
+            {
+                return GenerateRandomNumberInRange(60, 150);
+            }
+            
+            return GenerateRandomNumberInRange(20, 60);
+        }
     }
 }

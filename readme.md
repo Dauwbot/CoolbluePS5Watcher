@@ -12,7 +12,7 @@ You also need a SMTP capable mail provider, I use Google SMTP with MailKit, less
 
 Finally, you need to set the correct information into an `appSecrets.json` file, just rename and update the `appSecrets.example` file.
 
-Finally no help compiling and running this code will be given, you're on your own. Hint: You could just launch it in your IDE and it will work. Target framework in .NET5 but I don't use any C#9 functions so you could port it back…
+Finally no help compiling and running this code will be given, you're on your own. Hint: You could just launch it in your IDE and it will work. Target framework in .NET5 since I use the new `is not or` operators.
 
 #### Skills learned from project 💻
 

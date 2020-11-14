@@ -25,7 +25,8 @@ namespace PS5_Watcher
             do
             {
                 //Randomize retry timer to appear "Human". Honestly no human would refresh for more than 10hours.
-                int retryTimer = utility.GenerateRandomNumberInRange(40, 65);
+                int retryTimer = utility.GetRetryTimer();
+
                 Console.Write("Downloading URL HTML Content ");
                 string htmlData = utility.HtmlContentAsStream(urlToWatch);
                 Console.Write("| Finished downloading \n");
@@ -55,6 +56,10 @@ namespace PS5_Watcher
             Console.WriteLine("Sending message alert");
             var messageInfos = utility.SendSMS(configuration);
             Console.WriteLine(messageInfos);
+
+            Console.WriteLine($"Product was available at {DateTime.Now}. Alert has been sent to user");
+            Console.WriteLine("Press a key to exit!");
+            Console.ReadKey();
         }
     }
 }
