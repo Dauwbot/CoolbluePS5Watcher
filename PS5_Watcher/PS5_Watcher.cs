@@ -32,6 +32,12 @@ namespace PS5_Watcher
                     "https://www.bol.com/nl/p/sony-playstation-5-console/9300000004162282/?language=nl-BE&country=BE&approved=true",
                     "basket/addItems.html?productId=9300000004162282"
                     });
+            websites.Add("CDiscount",
+                new []
+                {
+                    "https://www.cdiscount.com/jeux-pc-video-console/ps5/console-ps5/l-1035001.html#_his_",
+                    "PLAYSTATION 5"
+                    });
 
             //Adding the JSON file containing our secrets to the application
             IConfigurationBuilder builder = new ConfigurationBuilder()
