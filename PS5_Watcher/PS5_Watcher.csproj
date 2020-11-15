@@ -10,6 +10,7 @@
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="5.0.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
+      <PackageReference Include="PhantomJS" Version="2.1.1" />
       <PackageReference Include="Selenium.Support" Version="3.141.0" />
       <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
       <PackageReference Include="Twilio" Version="5.49.0" />
@@ -20,6 +21,12 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <None Update="chromedriver.exe">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="userAgentsList.txt">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="proxyList.txt">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

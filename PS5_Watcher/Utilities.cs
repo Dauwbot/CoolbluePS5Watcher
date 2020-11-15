@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using MimeKit;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.Extensions;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
@@ -24,11 +25,15 @@ namespace PS5_Watcher
             string? data;
             try
             {
+                string userAgent = SelectRandomUA();
+                Console.WriteLine(userAgent);
+                
                 if (CheckStringForSubstring(urlAddress, "cdiscount") >= 0)
                 {
                     ChromeOptions options = new ChromeOptions();
                     options.AddArgument("headless");
-                    options.AddArgument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36");
+                    options.AddArgument(userAgent);
+                    
                     ChromeDriverService service = ChromeDriverService.CreateDefaultService();
                     service.HideCommandPromptWindow = true;
                     
@@ -36,12 +41,13 @@ namespace PS5_Watcher
                     driver.Navigate().GoToUrl(urlAddress);
                     data = driver.PageSource;
                     driver.Close();
-                    
+
                     return data;
                 }
+                
                 HttpWebRequest request = (HttpWebRequest) WebRequest.Create(urlAddress);
                 //Make us appear as a normal web browser rather than just a bot
-                request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36";
+                request.UserAgent = userAgent;
                 HttpWebResponse response = (HttpWebResponse) request.GetResponse();
 
                 if (response.StatusCode == HttpStatusCode.OK)
@@ -73,13 +79,22 @@ namespace PS5_Watcher
             return data;
         }
 
+        private string SelectRandomUA()
+        {
+            var userAgentsListFile = File.ReadAllLines("userAgentsList.txt");
+            var userAgentsList = new List<string>(userAgentsListFile);
+            Random randNum = new Random();
+            int randomUA = randNum.Next(userAgentsList.Count);
+            return "--user-agent=" + userAgentsList[randomUA];
+        }
+
         //Wrapper for IndexOf
         internal int CheckStringForSubstring(string completeString, string substringToFind)
         {
-            return completeString.IndexOf(substringToFind);
+            return completeString.IndexOf(substringToFind.ToLowerInvariant());
         }
 
-        //Process.Start does not work correctly on .NET CORE. Walk around
+        //Process.Start does not work correctly on .NET CORE. Workaround
         internal void OpenUrl(string urlAddress)
         {
             Process.Start(new ProcessStartInfo("cmd", $"/c start {urlAddress}") {CreateNoWindow = true});
@@ -99,7 +114,7 @@ namespace PS5_Watcher
                 TwilioClient.Init(accountSid, accountToken);
 
                 MessageResource message = MessageResource.Create(
-                    body: $"PS5 disponible sur {keyValuePair.Key} @ {keyValuePair.Value[0]}",
+                    body: $"PS5 available on {keyValuePair.Key} {keyValuePair.Value[0]}",
                     from: new PhoneNumber(senderNumber),
                     to: new PhoneNumber(receiverNumber)
                 );
@@ -128,10 +143,10 @@ namespace PS5_Watcher
             MimeMessage mailMessage = new MimeMessage();
             mailMessage.From.Add(new MailboxAddress(mailSenderName, mailSenderAddress));
             mailMessage.To.Add(new MailboxAddress(receiverName, receiverAddress));
-            mailMessage.Subject = $"PS5 Disponible sur {keyValuePair.Key}";
+            mailMessage.Subject = $"PS5 available at {keyValuePair.Key}";
             mailMessage.Body = new TextPart("plain")
             {
-                Text = $"PS5 disponible sur le site {keyValuePair.Key}  @ {keyValuePair.Value[0]}"
+                Text = $"PS5 available at {keyValuePair.Key} @ {keyValuePair.Value[0]}"
             };
 
             using (SmtpClient smtpClient = new SmtpClient())

@@ -18,25 +18,29 @@ namespace PS5_Watcher
                 new[] 
                 {
                     "https://www.coolblue.be/fr/produit/865866/playstation-5.html",
-                    "/fr/panier?add="
+                    "/fr/panier?add=",
+                    "1000000"
                 });
             websites.Add("Mediamarkt",
                 new[]
                 {
                     "https://www.mediamarkt.be/fr/product/_playstation-ps5-825-gb-9395201-1907411.html",
-                    "servlet/MultiChannelOrderCatalogEntryAdd?storeId="
+                    "servlet/MultiChannelOrderCatalogEntryAdd?storeId=",
+                    "275000"
                     });
             websites.Add("Bol.com",
                 new []
                 {
                     "https://www.bol.com/nl/p/sony-playstation-5-console/9300000004162282/?language=nl-BE&country=BE&approved=true",
-                    "basket/addItems.html?productId=9300000004162282"
+                    "basket/addItems.html?productId=9300000004162282",
+                    "330000"
                     });
             websites.Add("CDiscount",
                 new []
                 {
                     "https://www.cdiscount.com/jeux-pc-video-console/ps5/console-ps5/l-1035001.html#_his_",
-                    "PLAYSTATION 5"
+                    "PLAYSTATION 5",
+                    "100000"
                     });
             // websites.Add("Fnac BE",
             //     new []
@@ -56,13 +60,22 @@ namespace PS5_Watcher
             {
                 Utilities utility = new Utilities();
                 var productAvailable = false;
-
+                var websiteTry = 0;
+                var expectedHtmlLength = Convert.ToInt32(website.Value[2]);
+                
                 do
                 {
+                    var status = "OK";
+                    websiteTry++;
                     //Randomize retry timer to appear "Human". Honestly no human would refresh for more than 10hours.
                     int retryTimer = utility.GetRetryTimer();
                     
                     string htmlData = utility.HtmlContentAsStream(website.Value[0]);
+                    if (htmlData.Length < expectedHtmlLength)
+                    {
+                        status = "ERROR";
+                    }
+
                     if (retryTimer > 90)
                     {
                         FileInfo fileInfo = new FileInfo(Directory.GetCurrentDirectory());
@@ -78,7 +91,7 @@ namespace PS5_Watcher
                     }
                     else
                     {
-                        Console.WriteLine($"[{website.Key}] \tProduct is not available, retrying in {retryTimer} seconds");
+                        Console.WriteLine($"[{website.Key}\t{websiteTry}\t{status}]\tProduct is not available, retrying in {retryTimer} seconds.");
                         //Thread sleep is in milliseconds, I don't want to type milliseconds times...
                         Thread.Sleep(retryTimer * 1000);
                     }
@@ -87,7 +100,7 @@ namespace PS5_Watcher
 
                 Console.WriteLine($"[{website.Key}]" +
                                   $"\tProduct available, alerting user");
-                Console.Write($"\t\t" +
+                Console.Write($"\t" +
                               $"Opening website |");
                 utility.OpenUrl(website.Value[0]);
             
