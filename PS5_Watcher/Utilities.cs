@@ -26,14 +26,13 @@ namespace PS5_Watcher
             try
             {
                 string userAgent = SelectRandomUA();
-                Console.WriteLine(userAgent);
-                
-                if (CheckStringForSubstring(urlAddress, "cdiscount") >= 0)
+
+                if (CheckStringForSubstring(urlAddress, "cdiscount") >= 0 || CheckStringForSubstring(urlAddress, "fnac") >= 0)
                 {
                     ChromeOptions options = new ChromeOptions();
                     options.AddArgument("headless");
                     options.AddArgument(userAgent);
-                    
+
                     ChromeDriverService service = ChromeDriverService.CreateDefaultService();
                     service.HideCommandPromptWindow = true;
                     
@@ -41,6 +40,7 @@ namespace PS5_Watcher
                     driver.Navigate().GoToUrl(urlAddress);
                     data = driver.PageSource;
                     driver.Close();
+                    driver.Quit();
 
                     return data;
                 }
@@ -86,6 +86,21 @@ namespace PS5_Watcher
             Random randNum = new Random();
             int randomUA = randNum.Next(userAgentsList.Count);
             return "--user-agent=" + userAgentsList[randomUA];
+        }
+
+        private string[] SelectRandomProxy()
+        {
+            List<string[]> splitProxiesList = new List<string[]>();
+            
+            var proxiesListFile = File.ReadAllLines("proxiesList.txt");
+            foreach (var proxy in proxiesListFile)
+            {
+                var splitProxy = proxy.Split(":");
+                splitProxiesList.Add(splitProxy);
+            }
+            Random randNum = new Random();
+            int randomProxy = randNum.Next(splitProxiesList.Count);
+            return splitProxiesList[randomProxy];
         }
 
         //Wrapper for IndexOf

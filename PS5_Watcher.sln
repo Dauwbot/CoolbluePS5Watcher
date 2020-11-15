@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PS5_Watcher", "PS5_Watcher\PS5_Watcher.csproj", "{9A4A5A69-22BB-4047-BDDC-C6BF32030E59}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProxyTester", "ProxyTester\ProxyTester.csproj", "{97B8A9F3-68D3-484C-A2BC-D316A2F3CAD8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{9A4A5A69-22BB-4047-BDDC-C6BF32030E59}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A4A5A69-22BB-4047-BDDC-C6BF32030E59}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A4A5A69-22BB-4047-BDDC-C6BF32030E59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97B8A9F3-68D3-484C-A2BC-D316A2F3CAD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97B8A9F3-68D3-484C-A2BC-D316A2F3CAD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97B8A9F3-68D3-484C-A2BC-D316A2F3CAD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97B8A9F3-68D3-484C-A2BC-D316A2F3CAD8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

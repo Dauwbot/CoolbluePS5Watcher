@@ -42,12 +42,13 @@ namespace PS5_Watcher
                     "PLAYSTATION 5",
                     "100000"
                     });
-            // websites.Add("Fnac BE",
-            //     new []
-            //     {
-            //         "https://www.fr.fnac.be/Precommande-Console-Sony-PS5-Edition-Standard/a14119956",
-            //         "PLAYSTATION 5"
-            //     });
+            websites.Add("Fnac COM",
+                new []
+                {
+                    "https://www.fnac.com/Console-Sony-PS5-Edition-Standard/a14119956",
+                    "PLAYSTATION 5",
+                    "180000"
+                });
 
             //Adding the JSON file containing our secrets to the application
             IConfigurationBuilder builder = new ConfigurationBuilder()
