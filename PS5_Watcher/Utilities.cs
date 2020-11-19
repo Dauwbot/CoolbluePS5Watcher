@@ -2,15 +2,18 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Net;
+using System.Reflection;
+using System.Security;
 using System.Text;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Support.Extensions;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
@@ -19,15 +22,20 @@ namespace PS5_Watcher
 {
     public class Utilities
     {
-        //Grab the content of a webpage in a stream and place it in a string for easier analysis
-        public string HtmlContentAsStream(string urlAddress)
+        //Grab the content of a webpage in a stream and place it in a string for analysis
+        public string HtmlContentAsStream(string urlAddress, string websiteKey)
         {
-            string? data;
+            string? data = null;
+            string directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            DirectoryInfo dir = new DirectoryInfo(directory + "\\data\\screenshots\\" ?? string.Empty);
+            File.Delete(dir + "\\original\\" + websiteKey + ".png");
+            File.Delete(dir + "_" + websiteKey + ".png");
+            
             try
             {
                 string userAgent = SelectRandomUA();
-
-                if (CheckStringForSubstring(urlAddress, "cdiscount") >= 0 || CheckStringForSubstring(urlAddress, "fnac") >= 0)
+                
+                if (websiteKey != "Mediamarkt" && websiteKey != "Bol.com")
                 {
                     ChromeOptions options = new ChromeOptions();
                     options.AddArgument("headless");
@@ -35,13 +43,41 @@ namespace PS5_Watcher
 
                     ChromeDriverService service = ChromeDriverService.CreateDefaultService();
                     service.HideCommandPromptWindow = true;
-                    
+
                     IWebDriver driver = new ChromeDriver(service, options);
                     driver.Navigate().GoToUrl(urlAddress);
-                    data = driver.PageSource;
-                    driver.Close();
-                    driver.Quit();
+                    driver.Manage().Window.Size = new Size(1920, 1080);
 
+                    Screenshot ss = ((ITakesScreenshot) driver).GetScreenshot();
+                    ss.SaveAsFile(dir + "\\original\\" + websiteKey + ".png",
+                        ScreenshotImageFormat.Png);
+                    
+                    IWebElement element;
+                    if (CheckStringForSubstring(websiteKey, "Amazon") >= 0)
+                    {
+                        element = driver.FindElement(By.Id("rightCol"));
+                        var location = element.Location;
+                        var size = element.Size;
+                        data = element.Text;
+                        Bitmap bitmap = new Bitmap(dir + "\\original\\" + websiteKey + ".png");
+                        Bitmap croppedImage = bitmap.Clone(new Rectangle(location, size), bitmap.PixelFormat);
+                        croppedImage.Save(dir + "_" + websiteKey + ".png", ImageFormat.Png);
+                        bitmap.Dispose();
+
+                    } else
+                    {
+                        element = driver.FindElement(By.ClassName("lpTopTDG"));
+                        var location = element.Location;
+                        var size = element.Size;
+                        data = element.Text;
+                        Bitmap bitmap = new Bitmap(dir + "\\original\\" + websiteKey + ".png");
+                        Bitmap croppedImage = bitmap.Clone(new Rectangle(location.X, location.Y, size.Width - location.X/2, size.Height-location.Y/2), bitmap.PixelFormat);
+                        croppedImage.Save(dir + "_" + websiteKey + ".png", ImageFormat.Png);
+                        bitmap.Dispose();
+                    }
+
+                    
+                    driver.Close();
                     return data;
                 }
                 
@@ -64,17 +100,21 @@ namespace PS5_Watcher
                     response.Close();
                     reader.Close();
                 }
+  
                 else
                 {
                     //Well if we can't download the HTML we've surely been blacklisted as a bot...
                     //If you've a dynamic IP you should restart your router and hope it works again
-                    data = "There was a problem downloading HTML data, check if it is still working";
+                    throw new SecurityException("Not able to get the HTML data");
                 }
+            }
+            catch (SecurityException e)
+            {
+                Console.WriteLine($"[{websiteKey}] failed. {e}");
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                Console.WriteLine($"[{websiteKey}] failed. Exception: {e}");
             }
             return data;
         }
@@ -88,25 +128,10 @@ namespace PS5_Watcher
             return "--user-agent=" + userAgentsList[randomUA];
         }
 
-        private string[] SelectRandomProxy()
-        {
-            List<string[]> splitProxiesList = new List<string[]>();
-            
-            var proxiesListFile = File.ReadAllLines("proxiesList.txt");
-            foreach (var proxy in proxiesListFile)
-            {
-                var splitProxy = proxy.Split(":");
-                splitProxiesList.Add(splitProxy);
-            }
-            Random randNum = new Random();
-            int randomProxy = randNum.Next(splitProxiesList.Count);
-            return splitProxiesList[randomProxy];
-        }
-
         //Wrapper for IndexOf
         internal int CheckStringForSubstring(string completeString, string substringToFind)
         {
-            return completeString.IndexOf(substringToFind.ToLowerInvariant());
+            return completeString.IndexOf(substringToFind);
         }
 
         //Process.Start does not work correctly on .NET CORE. Workaround
@@ -192,22 +217,27 @@ namespace PS5_Watcher
             DateTime date = DateTime.Now;
 
             //If we're another date than the 18th or 19th
-            if (date.Day is not (18 or 19))
+            if (date.Day is not (17 or 18 or 19))
             {
-                return GenerateRandomNumberInRange(300, 900); 
+                return GenerateRandomNumberInRange(180, 300); 
             }
-            
+
+            if (date.Day is (18) && date.Hour is (>= 21) || date.Hour < 1)
+            {
+                return GenerateRandomNumberInRange(30, 75);
+            }
+
             if (date.Hour is (<= 6 or >= 20))
             {
-                return GenerateRandomNumberInRange(150, 300);
+                return GenerateRandomNumberInRange(180, 300); 
             }
             
-            if (date.Hour is (<= 8 or >= 16))
+            if (date.Hour is (<= 9 or >= 14))
             {
-                return GenerateRandomNumberInRange(30, 150);
+                return GenerateRandomNumberInRange(45, 90);
             }
             
-            return GenerateRandomNumberInRange(10, 30);
+            return GenerateRandomNumberInRange(10, 60);
         }
     }
 }
